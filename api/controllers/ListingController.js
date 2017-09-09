@@ -13,10 +13,12 @@ dosearch: function (req, res) {
 
   console.log('here');
 
-  var html = getFileHtml();
+  PageService.getLivePage({url: req.body.url, file: req.body.file});
+
+  //var html = getFileHtml();
 
   return res.json({
-      val: html
+      val: 'html'
     });
 
 },
