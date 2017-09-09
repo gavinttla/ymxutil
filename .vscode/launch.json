@@ -7,6 +7,12 @@
         {
             "type": "node",
             "request": "launch",
+            "name": "Launch cmd",
+            "program": "${workspaceRoot}/cmd.js"
+        },
+        {
+            "type": "node",
+            "request": "launch",
             "name": "Launch sails",
             "program": "${workspaceRoot}\\app.js"
         }
