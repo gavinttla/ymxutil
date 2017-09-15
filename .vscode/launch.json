@@ -8,7 +8,7 @@
             "type": "node",
             "request": "launch",
             "name": "Launch cmd",
-            "program": "${workspaceRoot}/cmd.js"
+            "program": "${workspaceRoot}\\cmd.js"
         },
         {
             "type": "node",
