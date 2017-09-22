@@ -15,6 +15,7 @@ dosearch: function (req, res) {
 
   PageService.getLivePage({url: req.body.url, file: req.body.file});
 
+  console.log('after get page');
   //var html = getFileHtml();
 
   return res.json({

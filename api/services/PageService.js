@@ -1,11 +1,15 @@
 var fs = require('fs');
 var request = require('request');
 var cheerio = require('cheerio');
+var FileCookieStore = require('tough-cookie-filestore');
+
+//console.log(option.url);
+var j = request.jar(new FileCookieStore('cookie.json'));
+request = request.defaults({jar:j});
 
 
 module.exports = {
 
-    
     /**
      * this function get the 
      * 
@@ -20,15 +24,34 @@ module.exports = {
         var requestOption = {
             url: option.url,
             headers: {
-                'User-Agent':'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.5) Gecko/2008120122 Firefox/3.0.5'
-            },
-            jar: true
+                'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:55.0) Gecko/20100101 Firefox/55.0',
+                'HTTP_ACCEPT':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'HTTP_ACCEPT_LANGUAGE':'en-US,en;q=0.5',
+                'HTTP_ACCEPT_ENCODING':'gzip, deflate'
+            }
         };
+
+        console.log(option.url);
 
         request(requestOption, function (error, response, body) {
             if (!error && response.statusCode == 200) {
 
-                var pageResult = this.checkPage(body);
+                var pageResult = PageService.checkPage(body, requ);
+
+                // if next page exist
+                if(pageResult.nextPageUrl) {
+
+                    setTimeout(function() {
+
+                        PageService.getPageByUrl(pageResult.nextPageUrl);
+
+                    }, 2000);
+
+                }
+
+
+
+
                 /*
                 console.log(body);
 
@@ -41,8 +64,9 @@ module.exports = {
                     console.log("store success");
                 });
                 */
+                //checkPage.done
             } else {
-                console.log("send request fail"+error);
+                console.log("send request fail:"+response);
             }
 
         });
@@ -51,7 +75,7 @@ module.exports = {
     },
 
 
-    checkPage: function(html) {
+    checkPage: function(html, url) {
 
         var isKeyExist = this.isKeywordExist(html);
 
@@ -63,17 +87,34 @@ module.exports = {
 
     getPageByUrl: function(url) {
 
+        var newurl = 'https://www.amazon.com'+url;
+        var curPageNum = PageService.getPageNum(url);
+
+        console.log('getPageByUrl:'+newurl);
+
         var requestOption = {
-            url: 'https://www.amazon.com'+url,
+            url: newurl,
             headers: {
                 'User-Agent':'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.5) Gecko/2008120122 Firefox/3.0.5'
             },
             jar: true
         };
 
+        console.log('processing url:'+newurl);
 
         request(requestOption, function (error, response, body) {
             if (!error && response.statusCode == 200) {
+                var pageResult = PageService.checkPage(body, url);;
+
+                // if next page exist
+                if(pageResult.nextPageUrl) {
+                    setTimeout(function(){
+                        
+                        PageService.getPageByUrl(pageResult.nextPageUrl);
+                    
+                    }, 2000);
+
+                }
 
             } else {
                 console.log("send request fail"+error);
@@ -84,7 +125,7 @@ module.exports = {
 
     },
 
-    isKeywordExist: function(html) {
+    isKeywordExist: function(html, keyword) {
 
 
 
@@ -94,9 +135,22 @@ module.exports = {
     /**
      * load with cheerio and get the first pagination link
      */
-    getNextPageLink: function(html) {
+    getNextPageLink: function(html, url) {
+        var newurl, tempnum, addnum, tempurl, curPageNum = PageService.getPageNum(url);
         var $ = cheerio.load(html);
-        return $(".pagnLink a").attr('href');
+
+        $(".pagnLink a").each(function(){
+            tempurl = $(this).attr('href');
+            tempnum = PageService.getPageNum(tempurl);
+            addnum = tempnum + 1;
+            if(addnum == curPageNum){
+                return tempurl;
+            } else {
+                tempurl = '';
+            }
+        });
+
+        return false;
     },
 
     /**
@@ -111,11 +165,8 @@ module.exports = {
         }else{
             return false;
         }
-    },
-
-    getCachePage: function(option, done) {
-        console.log('exec getLivePage');
     }
+
 
 
 };
