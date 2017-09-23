@@ -10,6 +10,8 @@ request = request.defaults({jar:j});
 
 module.exports = {
 
+    
+
     /**
      * this function get the 
      * 
@@ -36,7 +38,7 @@ module.exports = {
         request(requestOption, function (error, response, body) {
             if (!error && response.statusCode == 200) {
 
-                var pageResult = PageService.checkPage(body, requ);
+                var pageResult = PageService.checkPage(body, requestOption.url);
 
                 // if next page exist
                 if(pageResult.nextPageUrl) {
@@ -49,22 +51,6 @@ module.exports = {
 
                 }
 
-
-
-
-                /*
-                console.log(body);
-
-                fs.writeFile("temp/"+option.file, body, function(error) {
-                    
-                    if(error) {
-                        console.log(error);
-                    }
-
-                    console.log("store success");
-                });
-                */
-                //checkPage.done
             } else {
                 console.log("send request fail:"+response);
             }
@@ -73,17 +59,6 @@ module.exports = {
 
         
     },
-
-
-    checkPage: function(html, url) {
-
-        var isKeyExist = this.isKeywordExist(html);
-
-        var nextPageUrl = this.getNextPageLink(html);
-
-        return {isKeyExist: isKeyExist, nextPageUrl: nextPageUrl};
-    },
-
 
     getPageByUrl: function(url) {
 
@@ -95,7 +70,10 @@ module.exports = {
         var requestOption = {
             url: newurl,
             headers: {
-                'User-Agent':'Mozilla/5.0 (Windows; U; Windows NT 5.1; en-US; rv:1.9.0.5) Gecko/2008120122 Firefox/3.0.5'
+                'User-Agent':'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:55.0) Gecko/20100101 Firefox/55.0',
+                'HTTP_ACCEPT':'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'HTTP_ACCEPT_LANGUAGE':'en-US,en;q=0.5',
+                'HTTP_ACCEPT_ENCODING':'gzip, deflate'
             },
             jar: true
         };
@@ -104,7 +82,8 @@ module.exports = {
 
         request(requestOption, function (error, response, body) {
             if (!error && response.statusCode == 200) {
-                var pageResult = PageService.checkPage(body, url);;
+                console.log('start with second pull');
+                var pageResult = PageService.checkPage(body, newurl);;
 
                 // if next page exist
                 if(pageResult.nextPageUrl) {
@@ -125,6 +104,18 @@ module.exports = {
 
     },
 
+    
+
+    checkPage: function(html, url) {
+
+        var isKeyExist = this.isKeywordExist(html);
+
+        var nextPageUrl = this.getNextPageLink(html, url);
+
+        return {isKeyExist: isKeyExist, nextPageUrl: nextPageUrl};
+    },
+
+
     isKeywordExist: function(html, keyword) {
 
 
@@ -136,21 +127,25 @@ module.exports = {
      * load with cheerio and get the first pagination link
      */
     getNextPageLink: function(html, url) {
-        var newurl, tempnum, addnum, tempurl, curPageNum = PageService.getPageNum(url);
+        //console.log('getnextpagelink:'+url);
+        var newurl, tempnum, addnum, tempurl, finalurl;
+        var curPageNum = PageService.getPageNum(url);
+        if(!curPageNum){
+            curPageNum = 1;
+        }
         var $ = cheerio.load(html);
 
         $(".pagnLink a").each(function(){
             tempurl = $(this).attr('href');
+            //console.log(tempurl);
             tempnum = PageService.getPageNum(tempurl);
-            addnum = tempnum + 1;
-            if(addnum == curPageNum){
-                return tempurl;
-            } else {
-                tempurl = '';
-            }
+            addnum = parseInt(curPageNum) + 1;
+            if(addnum == parseInt(tempnum)){
+                finalurl = tempurl;
+            } 
         });
 
-        return false;
+        return finalurl;
     },
 
     /**
@@ -158,7 +153,7 @@ module.exports = {
      */
     getPageNum: function(pageUrl) {
         var re = /page=(\d+)/i;
-        var found = $url.match(re);
+        var found = pageUrl.match(re);
 
         if(found){
             return found[1];
@@ -169,4 +164,18 @@ module.exports = {
 
 
 
-};
+}
+
+
+/*
+var pageUtil = new function() {
+
+    this.vars = {};
+
+
+
+
+}
+*/
+
+
