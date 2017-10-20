@@ -34,6 +34,14 @@ module.exports.routes = {
 
   '/': {
     view: 'homepage'
+  },
+
+
+  'GET /socket': {
+    view: 'sockethome',
+    locals: {
+      layout: 'layout_socket'
+    }
   }
 
   /***************************************************************************

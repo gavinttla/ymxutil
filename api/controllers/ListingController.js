@@ -13,7 +13,9 @@ dosearch: function (req, res) {
 
   console.log('here');
 
-  PageService.getLivePage({url: req.body.url, file: req.body.file});
+  PageService.getLivePage({url: req.body.url, keyword:req.body.keyword, file: req.body.file});
+
+  //PageService.getPage({url: req.body.url, keyword:req.body.keyword, isOverWrite:true, file: req.body.file});
 
   console.log('after get page');
   //var html = getFileHtml();
