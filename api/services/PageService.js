@@ -52,6 +52,42 @@ var PageUtil = new function() {
 
         console.log(newurl);
 
+        var p1 = new Promise(function(resolve, reject){
+
+            request(requestOption, function (error, response, body) {
+                if (!error && response.statusCode == 200) {
+    
+                    var pageResult = self.checkPage(body, requestOption.url);
+    
+                    // if next page exist
+                    if(pageResult.nextPageUrl) {
+                        
+                        var nexturl = 'https://www.amazon.com'+pageResult.nextPageUrl;
+
+                        resolve(nexturl);
+                    }
+    
+                } else {
+                    reject(error);
+                    console.log("send request fail:"+response);
+                }
+    
+            });
+
+        });
+
+        
+        p1.then(function(url){
+            
+            return self.waitfor(url, 2000);
+        
+        }).then(function(newurl){
+
+            self.getLivePage(newurl);
+
+        });
+
+        /*
         request(requestOption, function (error, response, body) {
             if (!error && response.statusCode == 200) {
 
@@ -75,9 +111,18 @@ var PageUtil = new function() {
             }
 
         });
+        */
 
     };
 
+    /**
+     * wait for certain time
+     */
+    this.waitfor = function(url, time) {
+        return new Promise((resolve, reject) => {
+            setTimeout(resolve(url), time);
+        })
+    };
 
     this.checkPage = function(html, url) {
         var isKeyExist = this.isKeywordExist(html);

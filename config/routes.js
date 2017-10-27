@@ -42,6 +42,13 @@ module.exports.routes = {
     locals: {
       layout: 'layout_socket'
     }
+  },
+
+  'GET /plan': {
+    view: 'planhome',
+    locals: {
+      layout: 'layout_plan'
+    }
   }
 
   /***************************************************************************
