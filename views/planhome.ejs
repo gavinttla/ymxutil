@@ -1,3 +1,5 @@
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <!-- Default home page -->
 <link href='http://fonts.googleapis.com/css?family=Open+Sans:400italic,600' rel='stylesheet' type='text/css'>
 <style>
@@ -12,17 +14,65 @@ setTimeout(function sunrise () {
 
 <div class="default-page">
   <div class="header">
-    <h1 id="main-title" class="container"><%= __('A brand new app.') %></h1>
+    <h1 id="main-title" class="container"><%= __('App for product budget planning.') %></h1>
     <h3 class="container">You're looking at: <code><%= view.pathFromApp + '.' +view.ext %></code></h3>
   </div>
   <div class="main container clearfix">
     <!-- <h1>Getting started</h1>
     <p>Don't worry, we've got your back.</p> -->
+
+    <div id="chart_div"></div>
+
+    <div class="config">
+
+      <div class="config_item">
+        Total:<input name="total" id="total" value="" />
+      </div>
+      <div class="config_item">
+        Weeks:<input name="weeks" id="weeks" value="" />
+      </div>
+        
+      <input type="button" value="save" />
+
+
+    </div>
     
-    <input name="keyword" id="keyword" value="" />
 
-    <input type="button" value="search" />
+    
 
+    <script type="text/javascript">
+      
+            // Load the Visualization API and the corechart package.
+            google.charts.load('current', {'packages':['corechart']});
+      
+            // Set a callback to run when the Google Visualization API is loaded.
+            google.charts.setOnLoadCallback(drawChart);
+      
+            // Callback that creates and populates a data table,
+            // instantiates the pie chart, passes in the data and
+            // draws it.
+            function drawChart() {
+      
+              // Create the data table.
+              var data = new google.visualization.DataTable();
+              data.addColumn('string', 'Topping');
+              data.addColumn('number', 'Slices');
+              data.addRows([
+                ['产品投入', 50],
+                ['刷单', 18],
+                ['点击广告和图片', 32]
+              ]);
+      
+              // Set chart options
+              var options = {'title':'资源如何分配',
+                             'width':600,
+                             'height':300};
+      
+              // Instantiate and draw our chart, passing in some options.
+              var chart = new google.visualization.PieChart(document.getElementById('chart_div'));
+              chart.draw(data, options);
+            }
+          </script>
 
     <div class="response">
         here is response 2
